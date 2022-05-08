@@ -143,9 +143,19 @@ void setup()
 }
 
 
+int power_blink_interrval = 2000;
+unsigned long previous_power_blink = 0;
 
 void loop() {
- if (rf69.available()) {
+  // indicate that the power is on
+  unsigned long currentMillis = millis();
+  if (currentMillis - previous_power_blink > power_blink_interrval) {
+    // save the last time you blinked the LED
+    previous_power_blink = currentMillis;
+    Blink(LED, 2, 1);
+  }
+
+  if (rf69.available()) {
     // Should be a message for us now   
     uint8_t buf[RH_RF69_MAX_MESSAGE_LEN];
     uint8_t len = sizeof(buf);
