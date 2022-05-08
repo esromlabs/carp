@@ -132,21 +132,31 @@ void setup()
   pinMode(VBATPIN, INPUT);
 }
 
-
-// measuredvbat *= 2;    // we divided by 2, so multiply back
+// measuredvbat *= 2;    // resistors divided by 2, so multiply back
 // measuredvbat *= 3.3;  // Multiply by 3.3V, our reference voltage
 // measuredvbat /= 1024.0; // convert to voltage
-// measuredvbat *= 1000.0; // sent millivolts
+// measuredvbat *= 1000.0; // prepare to send millivolts (integer)
 #define VBAT_CONV2_MV 6.4453125 
 
 int pos = 0;
 float slider = 0;
 int last_pos = 0;
-int dir = 1;
-float slider_scale = 180.0 / 1024.0;  
-void loop() {
-  delay(10);
+float slider_scale = 180.0 / 1024.0;
+int power_blink_interrval = 2000;
+unsigned long previous_power_blink = 0;
 
+void loop() {
+  // indicate that the power is on
+  unsigned long currentMillis = millis();
+  if (currentMillis - previous_power_blink > power_blink_interrval) {
+    // save the last time you blinked the LED
+    previous_power_blink = currentMillis;
+    Blink(LED, 2, 1);
+  }
+  else {
+    delay(2);
+  }
+  
   slider = analogRead(SLIDER_PIN);
   // Serial.println(slider);
   slider = slider * slider_scale;
@@ -180,14 +190,12 @@ void loop() {
         Serial.println("Receive failed");
       }
     } else {
-      Serial.println("No reply, is another RFM69 listening?");
+      Serial.println("No reply, no other RFM69 responded!");
     }
 
     float measuredvbat = analogRead(VBATPIN);
     measuredvbat *= VBAT_CONV2_MV; // to millivolts 
     Serial.print("local BAT_MV: " ); Serial.println(measuredvbat);
-
- 
   }
 }
 
